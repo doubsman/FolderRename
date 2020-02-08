@@ -9,7 +9,7 @@ from codecs import open
 
 
 class ManageFolders(QObject):
-	"""build list folders name, search youtube and download first video find format mp4."""
+	"""Rename list folders."""
 						
 	def __init__(self, pathfolder, parent=None):
 		"""Init."""
@@ -38,6 +38,7 @@ class ManageFolders(QObject):
 		startfile(self.logFileName)
 
 	def folders_control(self):
+		"""Display results."""
 		counter = 0
 		for folderName in self.backList:
 			print(folderName)
@@ -60,10 +61,8 @@ class ManageFolders(QObject):
 	def add_characters(self, wordadd, goalC, decoCL ="", decoCR =""):
 		self.cleanlist = []
 		for folderName in self.pathList:
-			if isinstance(goalC, str):
-				if goalC == 'max':
-					goalC = int(len(folderName))
-			self.cleanlist.append(folderName[:goalC] + decoCL + wordadd + decoCR + folderName[goalC:])
+			posiC = self.convert_position_character(goalC, folderName)
+			self.cleanlist.append(folderName[:posiC] + decoCL + wordadd + decoCR + folderName[posiC:])
 		self.pathList = self.cleanlist
 
 	def delete_characters(self, startC, lenghtC):
@@ -75,14 +74,24 @@ class ManageFolders(QObject):
 	def move_characters(self, startC, lenghtC, goalC, decoCL ="", decoCR =""):
 		self.cleanlist = []
 		for folderName in self.pathList:
-			if isinstance(goalC, str):
-				if goalC == 'max':
-					goalC = int(len(folderName))
+			posiC = self.convert_position_character(goalC, folderName)
 			moveC = folderName[startC:lenghtC]
 			tempC = folderName[:startC] + folderName[startC + lenghtC:]
-			self.cleanlist.append(tempC[:goalC] + decoCL + moveC.strip() + decoCR + tempC[goalC:])
+			self.cleanlist.append(tempC[:posiC] + decoCL + moveC.strip() + decoCR + tempC[posiC:])
 		self.pathList = self.cleanlist
 	
+	def convert_position_character(self, posi, item):
+		"""conversion max to len()."""
+		if isinstance(pos, str):
+				# str
+				if pos == 'max':
+					posiC = int(len(item))
+			else:
+				# int
+				posiC = pos
+		return posiC
+
+
 	def write_log_file(self, operation, line, modification = True, writeconsole = True):
 		"""Write log file."""
 		if modification:
@@ -105,15 +114,15 @@ if __name__ == '__main__':
 		myfolder = argv[1]
 	else:
 		# test envt
-		myfolder = "T:\\work\\Fila Brazillia NT\\\Singles & EPs"
+		myfolder = r'T:\work\Box Sets'
 	# build class process
 	BuildProcess = ManageFolders(myfolder)
 	BuildProcess.replace_characters('(', '[')
 	BuildProcess.replace_characters(')', ']')
 	BuildProcess.replace_characters(' [Web]', '')
 	BuildProcess.move_characters(0, 5, 'max',' (',')')
-	#BuildProcess.add_characters('VA - ',0)
+	BuildProcess.add_characters('VA - ',0)
 	#BuildProcess.delete_characters(5,3)
 	BuildProcess.folders_control()
 	# processing
-	BuildProcess.folders_rename()
+	#BuildProcess.folders_rename()
