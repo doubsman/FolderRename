@@ -2,10 +2,11 @@
 # coding: utf-8
 
 from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import QObject, qDebug, QDateTime
-from os import walk, rename, path, mkdir, remove, rmdir, startfile
-from sys import argv
-from codecs import open
+from PyQt5.QtCore import QObject, qDebug
+from os import walk, rename, path
+from sys import argv, path as syspath
+syspath.append(path.dirname(path.dirname(path.abspath(__file__))))
+from LogPrintFile.LogPrintFile import LogPrintFile
 
 
 class ManageFolders(QObject):
@@ -21,21 +22,20 @@ class ManageFolders(QObject):
 		self.backList = self.pathList
 		self.cleanlist = []
 		# log
-		self.logFileName = QDateTime.currentDateTime().toString('yyMMddhhmmss') + "_ManageFolders.log"
-		self.logFileName = path.join(path.dirname(path.abspath(__file__)), "LOG", self.logFileName)
+		self.logProcess = LogPrintFile(path.join(path.dirname(path.abspath(__file__)), 'LOG'), 'ManageFolders', True, 30)
 
 	def folders_rename(self):
 		"""Rename folders list and write log."""
-		self.write_log_file('START OPERATIONS', self.pathfolder, False)
+		self.logProcess.write_log_file('START OPERATIONS', self.pathfolder, False)
 		counter = 0
 		for folderName in self.backList:
 			# clean name
-			self.write_log_file('FOLDER FOLDER', folderName)
-			self.write_log_file('CLEAN FOLDER', self.cleanlist[counter])
+			self.logProcess.write_log_file('FOLDER FOLDER', folderName)
+			self.logProcess.write_log_file('CLEAN FOLDER', self.cleanlist[counter])
 			rename(path.join(self.pathfolder, folderName), path.join(self.pathfolder, self.cleanlist[counter]))
 			counter += 1
-		self.write_log_file('END OPERATIONS.',"", False)
-		startfile(self.logFileName)
+		self.logProcess.write_log_file('END OPERATIONS.',"", False)
+		self.logProcess.view_log_file()
 
 	def folders_control(self):
 		"""Display results."""
@@ -82,30 +82,15 @@ class ManageFolders(QObject):
 	
 	def convert_position_character(self, posi, item):
 		"""conversion max to len()."""
-		if isinstance(pos, str):
-				# str
-				if pos == 'max':
-					posiC = int(len(item))
-			else:
-				# int
-				posiC = pos
+		if isinstance(posi, str):
+			# str
+			if posi == 'max':
+				posiC = int(len(item))
+		else:
+			# int
+			posiC = posi
 		return posiC
 
-
-	def write_log_file(self, operation, line, modification = True, writeconsole = True):
-		"""Write log file."""
-		if modification:
-			logline = '{:>22} : {}  '.format(operation, line)
-		else:
-			if line == "":
-				logline = operation + "\n"
-			else:
-				logline = '{} "{}"'.format(operation, line)
-		text_file = open(self.logFileName, "a", 'utf-8')
-		text_file.write(logline+"\n")
-		text_file.close()
-		if writeconsole:
-			print(logline)
 
 if __name__ == '__main__':
 	app = QApplication(argv)
@@ -114,15 +99,13 @@ if __name__ == '__main__':
 		myfolder = argv[1]
 	else:
 		# test envt
-		myfolder = r'T:\work\Box Sets'
+		myfolder = r'T:\work\Tiken Jah Fakoly - Discographie [mp3-320]'
 	# build class process
 	BuildProcess = ManageFolders(myfolder)
-	BuildProcess.replace_characters('(', '[')
-	BuildProcess.replace_characters(')', ']')
-	BuildProcess.replace_characters(' [Web]', '')
 	BuildProcess.move_characters(0, 5, 'max',' (',')')
-	BuildProcess.add_characters('VA - ',0)
+	BuildProcess.replace_characters(' [320]', '')
+	BuildProcess.add_characters('Tiken Jah Fakoly - ', 0)
 	#BuildProcess.delete_characters(5,3)
 	BuildProcess.folders_control()
 	# processing
-	#BuildProcess.folders_rename()
+	BuildProcess.folders_rename()
