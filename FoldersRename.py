@@ -1,28 +1,33 @@
 #! /usr/bin/python
 # coding: utf-8
 
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import QObject, qDebug
+from PyQt5.QtCore import QObject
 from os import walk, rename, path
-from sys import argv, path as syspath
+from sys import path as syspath
 syspath.append(path.dirname(path.dirname(path.abspath(__file__))))
 from LogPrintFile.LogPrintFile import LogPrintFile
 
 
-class ManageFolders(QObject):
+class FoldersRename(QObject):
 	"""Rename list folders."""
 						
-	def __init__(self, pathfolder, parent=None):
+	def __init__(self, parent=None):
 		"""Init."""
-		super(ManageFolders, self).__init__(parent)
+		super(FoldersRename, self).__init__(parent)
 		self.parent = parent
-		self.pathfolder = pathfolder
+		self.pathfolder = None
+		self.pathList = None
+		self.backList = None
+		self.cleanlist = []
+		# log
+		self.logProcess = LogPrintFile(path.join(path.dirname(path.abspath(__file__)), 'LOG'), 'FoldersRename', True, 30)
+
+	def folder_init(self, pathfolder):
 		# build list
+		self.pathfolder = pathfolder
 		self.pathList = self.folders_list()
 		self.backList = self.pathList
 		self.cleanlist = []
-		# log
-		self.logProcess = LogPrintFile(path.join(path.dirname(path.abspath(__file__)), 'LOG'), 'ManageFolders', True, 30)
 
 	def folders_rename(self):
 		"""Rename folders list and write log."""
@@ -90,22 +95,3 @@ class ManageFolders(QObject):
 			# int
 			posiC = posi
 		return posiC
-
-
-if __name__ == '__main__':
-	app = QApplication(argv)
-	if len(argv)>1:
-		# prod
-		myfolder = argv[1]
-	else:
-		# test envt
-		myfolder = r'T:\work\Tiken Jah Fakoly - Discographie [mp3-320]'
-	# build class process
-	BuildProcess = ManageFolders(myfolder)
-	BuildProcess.move_characters(0, 5, 'max',' (',')')
-	BuildProcess.replace_characters(' [320]', '')
-	BuildProcess.add_characters('Tiken Jah Fakoly - ', 0)
-	#BuildProcess.delete_characters(5,3)
-	BuildProcess.folders_control()
-	# processing
-	BuildProcess.folders_rename()
