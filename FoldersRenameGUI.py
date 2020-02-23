@@ -241,22 +241,19 @@ class FoldersRenameGUI(QMainWindow, Ui_Dialog):
 
 	def fillTableactions(self):
 		"""Prepare combos."""
-		# fill combos actions
+		# fill line actions
 		for row in range(self.modelactions.rowCount()):
-			try:
+			# if present action
+			if row < len(self.arrayactions):
+				col = 0
+				for params in self.arrayactions[row]:
+					if col > 0:
+						item = QStandardItem(params)
+						self.modelactions.setItem(row, col, item)
+					col += 1
 				self.buildComboActions(row, self.arrayactions[row][0])
-			except:
+			else:
 				self.buildComboActions(row)
-		# fill actions
-		row = 0
-		for action in self.arrayactions:
-			col = 0
-			for params in action:
-				if col > 0:
-					item = QStandardItem(params)
-					self.modelactions.setItem(row, col, item)
-				col += 1
-			row += 1
 		#self.tbl_viewactions.horizontalHeader().setStretchLastSection(False)
 		#self.tbl_viewactions.resizeColumnsToContents()
 		#self.tbl_viewactions.horizontalHeader().setStretchLastSection(True)			
