@@ -27,7 +27,7 @@ class FoldersRename(QObject):
 		self.pathfolder = pathfolder
 		self.pathList = self.folders_list()
 		self.backList = self.pathList
-		self.cleanlist = []
+		self.cleanlist = self.pathList
 
 	def folders_rename(self):
 		"""Rename folders list and write log."""
