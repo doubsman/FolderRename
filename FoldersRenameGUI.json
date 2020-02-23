@@ -1,0 +1,51 @@
+{
+    "General": {
+        "Programs": "Folders Rename Managment",
+        "Version": 0.7,
+        "Size Row Table": 30,
+        "Font": "Calibri",
+        "Ico": "FoldersRenameGUI.ico"
+    },
+    "Actions": {
+        "-": [
+            "Actions",
+            "Paramater",
+            "Paramater",
+            "Paramater",
+            "Paramater",
+            "Paramater"
+        ],
+        "move": [
+            "Actions",
+            "Start",
+            "Length",
+            "Goal",
+            "Deco Left",
+            "Deco Right"
+        ],
+        "replace": [
+            "Actions",
+            "Replace",
+            "By",
+            "---",
+            "---",
+            "---"
+        ],
+        "add": [
+            "Actions",
+            "Text",
+            "Start",
+            "---",
+            "---",
+            "---"
+        ],
+        "delete": [
+            "Actions",
+            "Start",
+            "Length",
+            "---",
+            "---",
+            "---"
+        ]
+    }
+}

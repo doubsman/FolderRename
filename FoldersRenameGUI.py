@@ -15,21 +15,46 @@ class FoldersRenameGUI(QMainWindow, Ui_Dialog):
 	"""Init mini Gui constants."""
 	DOWN 		= 1
 	UP   		= -1
-	C_ROWHEIGHT = 30
 
 	def __init__(self, parent=None):
 		super(FoldersRenameGUI, self).__init__(parent)
 
 		self.parent = parent
 		self.setupUi(self)
-		self.setWindowIcon(QIcon('FoldersRenameGUI.ico'))
-		self.setWindowTitle('Folders Rename Managment 1.0')
+
+		# default config
+		self.C_ROWHEIGHT = 30
+		self.listcolumnsactions = {'-'       : ['Actions', 'Paramater', 'Paramater', 'Paramater', 'Paramater', 'Paramater'],
+								   'move'    : ['Actions', 'Start', 'Length', 'Goal', 'Deco Left', 'Deco Right'],
+								   'replace' : ['Actions', 'Replace', 'By', '---', '---', '---'],
+								   'add'     : ['Actions', 'Text','Start', '---', '---', '---'],
+								   'delete'  : ['Actions', 'Start','Length', '---', '---', '---']}
+		self.defaultconfiguration = {  'General' : { 'Programs'  : 'Folders Rename Managment',
+											  'Version'  : 0.7,
+											  'Size Row Table'  : 30,
+											  'Font' : "Calibri",
+											  'Ico'  : 'FoldersRenameGUI.ico'
+											},
+										'Actions' : self.listcolumnsactions}
+		
+		# json file configuration ?
+		file_configuration = path.join(path.dirname(path.abspath(__file__)), 'FoldersRenameGUI.json')
+		if path.exists(file_configuration):
+			data_file = open(file_configuration, 'r')
+			self.configuration = load(data_file)
+			data_file.close()
+		else:
+			self.configuration = self.defaultconfiguration
+
+		self.setWindowIcon(QIcon(self.configuration['General']['Ico']))
+		self.setWindowTitle(self.configuration['General']['Programs'] + ' ' + str(self.configuration['General']['Version']))
 		self.arrayactions = []
 		self.file_json = None
+		self.C_ROWHEIGHT = int(self.configuration['General']['Size Row Table'])
 
 		# define font tab
 		self.fontbig = QFont()
-		self.fontbig.setFamily("Calibri")
+		self.fontbig.setFamily(self.configuration['General']['Font'])
 		self.fontbig.setFixedPitch(True)
 		self.fontbig.setPointSize(12)
 		self.tbl_viewactions.setFont(self.fontbig)
@@ -45,20 +70,14 @@ class FoldersRenameGUI(QMainWindow, Ui_Dialog):
 		self.btn_test.setIcon(self.style().standardIcon(QStyle.SP_BrowserReload))
 		self.btn_test.setText('Test')
 
-		# define list
+		# define lists
 		self.listcolumnsresult = ['Actual','New']
 		self.listsizeresult = [200, 200]
-		self.listcolumnsactions = {'-'       : ['Actions', 'Paramater', 'Paramater', 'Paramater', 'Paramater', 'Paramater'],
-								   'move'    : ['Actions', 'Start', 'Length', 'Goal', 'Deco Left', 'Deco Right'],
-								   'replace' : ['Actions', 'Replace', 'By', '---', '---', '---'],
-								   'add'     : ['Actions', 'Text','Start', '---', '---', '---'],
-								   'delete'  : ['Actions', 'Start','Length', '---', '---', '---']}
-		self.listecomboactions = self.listcolumnsactions.keys()
-		self.listsizeactions = [150] + ([110] *5)
+		self.listcolumnsactions = self.configuration['Actions']
+		self.listcomboactions = self.listcolumnsactions.keys()
+		self.listsizeactions = [200] + ([110] *5)
 		
-		self.configuration = { 'Actions' : self.listcolumnsactions}
-
-		# format tableview
+		# format tableviews
 		self.prepareTable(self.tbl_viewresult, self.listsizeresult)
 		self.modelfolder = self.prepareModel(self.tbl_viewresult, self.listsizeresult, self.listcolumnsresult)
 		self.prepareTable(self.tbl_viewactions, self.listsizeactions)
@@ -126,8 +145,7 @@ class FoldersRenameGUI(QMainWindow, Ui_Dialog):
 		self.file_json = self.file_json[0]
 		# write file
 		data_file = open(self.file_json, 'w+')
-		#data_file.write(dumps(self.arrayactions, indent=4))
-		data_file.write(dumps(self.configuration, indent=4))
+		data_file.write(dumps(self.arrayactions, indent=4))
 		data_file.close()
 
 	def loadListactions(self):
@@ -225,28 +243,23 @@ class FoldersRenameGUI(QMainWindow, Ui_Dialog):
 		"""Prepare combos."""
 		# fill combos actions
 		for row in range(self.modelactions.rowCount()):
-			combo_actions = QComboBox(self)
-			#combo_actions.currentIndexChanged.connect(lambda n=row: self.onComboChanged(row))
-			combo_actions.addItems(self.listecomboactions)
-			i = self.tbl_viewactions.model().index(row , 0)
-			self.tbl_viewactions.setIndexWidget(i, combo_actions)
+			try:
+				self.buildComboActions(row, self.arrayactions[row][0])
+			except:
+				self.buildComboActions(row)
 		# fill actions
 		row = 0
 		for action in self.arrayactions:
 			col = 0
 			for params in action:
-				if col == 0:
-					i = self.tbl_viewactions.model().index(row , col)
-					combo = self.tbl_viewactions.indexWidget(i)
-					combo.currentIndexChanged.disconnect()
-					index = combo.findText(action[0], Qt.MatchFixedString)
-					if index >= 0:
-						combo.setCurrentIndex(index)
-				else:
+				if col > 0:
 					item = QStandardItem(params)
 					self.modelactions.setItem(row, col, item)
 				col += 1
 			row += 1
+		#self.tbl_viewactions.horizontalHeader().setStretchLastSection(False)
+		#self.tbl_viewactions.resizeColumnsToContents()
+		#self.tbl_viewactions.horizontalHeader().setStretchLastSection(True)			
 
 	def fillTablefolder(self):
 		"""Display columns list and transformation."""
@@ -292,7 +305,11 @@ class FoldersRenameGUI(QMainWindow, Ui_Dialog):
 			return
 		# in progress
 		row = selected[0].row()
-		print(selected[0].row()+1)
+		self.modelactions.removeRow(row)
+		# add end line
+		self.modelactions.insertRow(self.modelactions.rowCount())
+		# rebuild combo
+		self.buildComboActions(self.modelactions.rowCount() - 1)
 
 	def move_action(self, direction = DOWN):
 		if direction not in (self.DOWN, self.UP):
@@ -302,6 +319,10 @@ class FoldersRenameGUI(QMainWindow, Ui_Dialog):
 		selected = selModel.selectedRows()
 		if not selected:
 			return
+		row = selected[0].row()
+		i = self.tbl_viewactions.model().index(row , 0)
+		combo = self.tbl_viewactions.indexWidget(i)
+		value = combo.currentText()
 		items = []
 		indexes = sorted(selected, key=lambda x: x.row(), reverse=(direction==self.DOWN))
 		for idx in indexes:
@@ -315,6 +336,22 @@ class FoldersRenameGUI(QMainWindow, Ui_Dialog):
 		selModel.clear()
 		for item in items:
 			selModel.select(item.index(), selModel.Select|selModel.Rows)
+		# rebuild combo
+		self.buildComboActions(row + direction, value)
+	
+	def buildComboActions(self, row, value = None):
+		# create combo
+		combo_actions = QComboBox(self)
+		combo_actions.addItems(self.listcomboactions)
+		#combo_actions.currentIndexChanged.connect(lambda n=row: self.onComboChanged(row))
+		i = self.tbl_viewactions.model().index( row, 0)
+		self.tbl_viewactions.setIndexWidget(i, combo_actions)
+		# select value
+		if value is not None:
+			index = combo_actions.findText(value, Qt.MatchFixedString)
+			if index >= 0:
+				combo_actions.setCurrentIndex(index)	
+
 
 
 if __name__ == '__main__':
