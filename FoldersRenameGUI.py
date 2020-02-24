@@ -6,7 +6,7 @@ from json import load, dumps
 from Ui_FoldersRename import Ui_MainWindow
 #from Ui_MainWindow import Ui_Dialog
 from FoldersRename import FoldersRename
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtGui import QIcon, QStandardItemModel, QStandardItem, QMouseEvent, QFont
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QStyle, QMenu, QComboBox
 
@@ -19,13 +19,10 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 
 	def __init__(self, parent=None):
 		super(FoldersRenameGUI, self).__init__(parent)
-
 		self.parent = parent
 		self.setupUi(self)
-		#self.resize(1300, 900)
 
 		# default config
-		self.C_ROWHEIGHT = 30
 		self.listcolumnsactions = {'-'       : ['Actions', 'Paramater', 'Paramater', 'Paramater', 'Paramater', 'Paramater'],
 								   'move'    : ['Actions', 'Start', 'Length', 'Goal', 'Deco Left', 'Deco Right'],
 								   'replace' : ['Actions', 'Replace', 'By', '---', '---', '---'],
@@ -35,8 +32,10 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 											  'Version'  : 0.7,
 											  'Size Row Table'  : 30,
 											  'Font' : "Calibri",
-											  'Ico'  : 'FoldersRenameGUI.ico'
-											},
+											  'Ico'  : 'FoldersRenameGUI.ico',
+											  'Width': 1350,
+        									  'Height': 850
+									},
 										'Actions' : self.listcolumnsactions}
 		
 		# json file configuration ?
@@ -47,12 +46,13 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 			data_file.close()
 		else:
 			self.configuration = self.defaultconfiguration
-
+		
+		self.setMinimumSize(600, 600)
+		self.resize(self.configuration['General']['Width'], self.configuration['General']['Height'])
 		self.setWindowIcon(QIcon(self.configuration['General']['Ico']))
 		self.setWindowTitle(self.configuration['General']['Programs'] + ' ' + str(self.configuration['General']['Version']))
 		self.arrayactions = []
 		self.file_json = None
-		self.C_ROWHEIGHT = int(self.configuration['General']['Size Row Table'])
 
 		# define font tab
 		self.fontbig = QFont()
@@ -64,26 +64,31 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 		# define buttons
 		self.btn_selectfolder.setIcon(self.style().standardIcon(QStyle.SP_DialogOpenButton))
 		self.btn_run.setIcon(self.style().standardIcon(QStyle.SP_DialogApplyButton))
-		self.btn_run.setText('Rename')
+		self.btn_run.setText('Rename Folders')
 		self.btn_save.setIcon(self.style().standardIcon(QStyle.SP_DialogSaveButton))
-		self.btn_save.setText('Save')
+		self.btn_save.setText('Save Json')
 		self.btn_load.setIcon(self.style().standardIcon(QStyle.SP_DialogSaveButton))
-		self.btn_load.setText('Load')
+		self.btn_load.setText('Load Json')
 		self.btn_test.setIcon(self.style().standardIcon(QStyle.SP_BrowserReload))
-		self.btn_test.setText('Test')
+		self.btn_test.setText('Test Actions')
+		self.btn_run.setEnabled(False)
+		self.btn_test.setEnabled(False)
+
 
 		# define lists
-		self.listcolumnsresult = ['Actual','New']
+		self.listcolumnsresult = ['Current Name','New Name']
 		self.listsizeresult = [200, 200]
 		self.listcolumnsactions = self.configuration['Actions']
 		self.listcomboactions = self.listcolumnsactions.keys()
 		self.listsizeactions = [200] + ([110] *5)
 		
 		# format tableviews
+		self.C_ROWHEIGHT = int(self.configuration['General']['Size Row Table'])
+		self.NBLINES = int((self.frameGeometry().height() - 130) / self.C_ROWHEIGHT)
 		self.prepareTable(self.tbl_viewresult, self.listsizeresult)
-		self.modelfolder = self.prepareModel(self.tbl_viewresult, self.listsizeresult, self.listcolumnsresult)
+		self.modelfolder = self.prepareModel(self.tbl_viewresult, self.listsizeresult, self.listcolumnsresult, self.NBLINES)
 		self.prepareTable(self.tbl_viewactions, self.listsizeactions)
-		self.modelactions = self.prepareModel(self.tbl_viewactions, self.listsizeactions, self.listcolumnsactions['-'])
+		self.modelactions = self.prepareModel(self.tbl_viewactions, self.listsizeactions, self.listcolumnsactions['-'], self.NBLINES)
 
 		# pop up
 		self.menua = QMenu()
@@ -107,6 +112,17 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 		self.FoldersRename = FoldersRename()
 		# init actions tab
 		self.fillTableactions()
+	
+	@pyqtSlot()
+	def resizeEvent(self, event):
+		"""Widget size move."""
+		newnumberlines = int((self.frameGeometry().height() - 140) / self.C_ROWHEIGHT)
+		if newnumberlines != self.NBLINES:
+			self.buildListactions()
+			self.NBLINES = int((self.frameGeometry().height() - 140) / self.C_ROWHEIGHT)
+			if self.NBLINES > len(self.arrayactions):
+				self.modelactions = self.prepareModel(self.tbl_viewactions, self.listsizeactions, self.listcolumnsactions['-'], self.NBLINES)
+				self.fillTableactions()
 
 	def selectFolder(self, linpathfolder = False):
 		if not linpathfolder:
@@ -141,7 +157,7 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 		# build list actions
 		self.buildListactions()
 		self.file_json = QFileDialog.getSaveFileName(self,
-										"Create file for save parameters",
+										"Create file for save Actions",
 										getcwd(),
 										"Json (*.json)")
 		self.file_json = self.file_json[0]
@@ -153,7 +169,7 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 	def loadListactions(self):
 		"""Backup list actions to json file."""
 		self.file_json = QFileDialog.getOpenFileName(self,
-										"Load file for init parameters",
+										"Load file for init Actions",
 										getcwd(),
 										"Json (*.json)")
 		self.file_json = self.file_json[0]
@@ -178,21 +194,21 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 		# realise actions
 		for action in self.arrayactions:
 			if action[0] == 'move':
-				par1 = self.trtparams(action[1])
-				par2 = self.trtparams(action[2])
-				par3 = self.trtparams(action[3])
-				par4 = self.trtparams(action[4])
-				par5 = self.trtparams(action[5])
+				par1 = self.trtparams(action[1], 'int')
+				par2 = self.trtparams(action[2], 'mix')
+				par3 = self.trtparams(action[3], 'mix')
+				par4 = self.trtparams(action[4], 'str')
+				par5 = self.trtparams(action[5], 'str')
 				self.FoldersRename.move_characters(par1, par2, par3, par4, par5)
 			elif action[0] == 'replace':
-				par1 = self.trtparams(action[1])
-				par2 = self.trtparams(action[2])
+				par1 = self.trtparams(action[1], 'str')
+				par2 = self.trtparams(action[2], 'str')
 				self.FoldersRename.replace_characters(par1, par2)
 			elif action[0] == 'add':
-				par1 = self.trtparams(action[1])
-				par2 = self.trtparams(action[2])
-				par3 = self.trtparams(action[3])
-				par4 = self.trtparams(action[4])
+				par1 = self.trtparams(action[1], 'str')
+				par2 = self.trtparams(action[2], 'mix')
+				par3 = self.trtparams(action[3], 'str')
+				par4 = self.trtparams(action[4], 'str')
 				if par3 == '':
 					self.FoldersRename.add_characters(par1, par2)
 				elif par4 == '':
@@ -200,14 +216,21 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 				else:
 					self.FoldersRename.add_characters(par1, par2, par3, par4)
 			elif action[0] == 'delete':
-				par1 = self.trtparams(action[1])
-				par2 = self.trtparams(action[2])
+				par1 = self.trtparams(action[1], 'int')
+				par2 = self.trtparams(action[2], 'mix')
 				self.FoldersRename.delete_characters(par1, par2)
 	
-	def trtparams(self, param):
-		"""Convert String to int is numeric."""
-		if param.isnumeric():
+	def trtparams(self, param, type = None):
+		"""Convert String to int function type param."""
+		if type == 'int':
 			param = int(param)
+		elif type == 'str':
+			param = str(param)
+		elif type == 'mix':
+			if param.isnumeric():
+				param = int(param)
+			else:
+				param = str(param)
 		return param
 
 	def getValueCellactions(self, model, row, col):
@@ -234,7 +257,7 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 			table.setColumnWidth(ind, listsizecolumns[ind])
 		table.verticalHeader().setDefaultSectionSize(self.C_ROWHEIGHT)
 	
-	def prepareModel(self, table, listsizecolumns, listnamecolumns, defaultline = 22):
+	def prepareModel(self, table, listsizecolumns, listnamecolumns, defaultline = 20):
 		"""Define table model : fill columns name."""
 		model = QStandardItemModel(defaultline, len(listsizecolumns), self)
 		model.setHorizontalHeaderLabels(listnamecolumns)
@@ -262,9 +285,7 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 
 	def fillTablefolder(self):
 		"""Display columns list and transformation."""
-		self.modelfolder = QStandardItemModel(len(self.FoldersRename.pathList), len(self.listcolumnsresult), self)
-		self.modelfolder.setHorizontalHeaderLabels(self.listcolumnsresult)
-		self.tbl_viewresult.setModel(self.modelfolder)
+		self.modelfolder = self.prepareModel(self.tbl_viewresult, self.listsizeresult, self.listcolumnsresult, len(self.FoldersRename.pathList))
 		counter = 0
 		for row in range(self.modelfolder.rowCount()):
 			item = QStandardItem(self.FoldersRename.backList[counter])
@@ -275,6 +296,8 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 		self.tbl_viewresult.horizontalHeader().setStretchLastSection(False)
 		self.tbl_viewresult.resizeColumnsToContents()
 		self.tbl_viewresult.horizontalHeader().setStretchLastSection(True)
+		self.btn_run.setEnabled(len(self.FoldersRename.backList) > 0)
+		self.btn_test.setEnabled(len(self.FoldersRename.backList) > 0)
 	
 	def popUpTreeAlbums(self, position):
 		self.menua.exec_(self.tbl_viewactions.viewport().mapToGlobal(position))
@@ -309,6 +332,8 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 		self.modelactions.insertRow(self.modelactions.rowCount())
 		# rebuild combo
 		self.buildComboActions(self.modelactions.rowCount() - 1)
+		# build list actions
+		self.buildListactions()
 
 	def move_action(self, direction = DOWN):
 		if direction not in (self.DOWN, self.UP):
@@ -337,7 +362,9 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 			selModel.select(item.index(), selModel.Select|selModel.Rows)
 		# rebuild combo
 		self.buildComboActions(row + direction, value)
-	
+		# build list actions
+		self.buildListactions()
+
 	def buildComboActions(self, row, value = None):
 		# create combo
 		combo_actions = QComboBox(self)
