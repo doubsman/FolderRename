@@ -3,7 +3,8 @@
 from sys import argv
 from os import path, getcwd
 from json import load, dumps
-from Ui_MainWindow import Ui_Dialog
+from Ui_FoldersRename import Ui_MainWindow
+#from Ui_MainWindow import Ui_Dialog
 from FoldersRename import FoldersRename
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon, QStandardItemModel, QStandardItem, QMouseEvent, QFont
@@ -11,7 +12,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QStyle, QMen
 
 
 
-class FoldersRenameGUI(QMainWindow, Ui_Dialog):
+class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 	"""Init mini Gui constants."""
 	DOWN 		= 1
 	UP   		= -1
@@ -21,6 +22,7 @@ class FoldersRenameGUI(QMainWindow, Ui_Dialog):
 
 		self.parent = parent
 		self.setupUi(self)
+		#self.resize(1300, 900)
 
 		# default config
 		self.C_ROWHEIGHT = 30
@@ -61,10 +63,10 @@ class FoldersRenameGUI(QMainWindow, Ui_Dialog):
 	
 		# define buttons
 		self.btn_selectfolder.setIcon(self.style().standardIcon(QStyle.SP_DialogOpenButton))
-		self.btn_rename.setIcon(self.style().standardIcon(QStyle.SP_DialogApplyButton))
-		self.btn_rename.setText('Rename')
-		self.btn_sav.setIcon(self.style().standardIcon(QStyle.SP_DialogSaveButton))
-		self.btn_sav.setText('Save')
+		self.btn_run.setIcon(self.style().standardIcon(QStyle.SP_DialogApplyButton))
+		self.btn_run.setText('Rename')
+		self.btn_save.setIcon(self.style().standardIcon(QStyle.SP_DialogSaveButton))
+		self.btn_save.setText('Save')
 		self.btn_load.setIcon(self.style().standardIcon(QStyle.SP_DialogSaveButton))
 		self.btn_load.setText('Load')
 		self.btn_test.setIcon(self.style().standardIcon(QStyle.SP_BrowserReload))
@@ -92,10 +94,10 @@ class FoldersRenameGUI(QMainWindow, Ui_Dialog):
 		# events
 		self.btn_selectfolder.clicked.connect(self.selectFolder)
 		self.lin_pathfolder.returnPressed.connect(lambda: self.selectFolder(True))
-		self.btn_sav.clicked.connect(self.saveListactions)
+		self.btn_save.clicked.connect(self.saveListactions)
 		self.btn_load.clicked.connect(self.loadListactions)
 		self.btn_test.clicked.connect(self.testFoldersRename)
-		self.btn_rename.clicked.connect(self.runFoldersRename)
+		self.btn_run.clicked.connect(self.runFoldersRename)
 		self.tbl_viewactions.setContextMenuPolicy(Qt.CustomContextMenu)
 		self.tbl_viewactions.customContextMenuRequested.connect(self.popUpTreeAlbums)
 		self.tbl_viewactions.clicked.connect(self.onSelectAction)
@@ -232,7 +234,7 @@ class FoldersRenameGUI(QMainWindow, Ui_Dialog):
 			table.setColumnWidth(ind, listsizecolumns[ind])
 		table.verticalHeader().setDefaultSectionSize(self.C_ROWHEIGHT)
 	
-	def prepareModel(self, table, listsizecolumns, listnamecolumns, defaultline = 26):
+	def prepareModel(self, table, listsizecolumns, listnamecolumns, defaultline = 22):
 		"""Define table model : fill columns name."""
 		model = QStandardItemModel(defaultline, len(listsizecolumns), self)
 		model.setHorizontalHeaderLabels(listnamecolumns)

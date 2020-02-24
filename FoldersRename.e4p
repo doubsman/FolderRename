@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-5.1.dtd">
 <!-- eric project file for project FoldersRename -->
-<!-- Saved: 2020-02-21, 22:46:27 -->
+<!-- Saved: 2020-02-24, 11:16:26 -->
 <!-- Copyright (C) 2020 doubsman,  -->
 <Project version="5.1">
   <Language>en_US</Language>
@@ -16,11 +16,10 @@
     <Source>FoldersRename.py</Source>
     <Source>FoldersRenameCMD.py</Source>
     <Source>FoldersRenameGUI.py</Source>
-    <Source>Ui_MainWindow.py</Source>
-    <Source>__init__.py</Source>
+    <Source>Ui_FoldersRename.py</Source>
   </Sources>
   <Forms>
-    <Form>MainWindow.ui</Form>
+    <Form>FoldersRename.ui</Form>
   </Forms>
   <Vcs>
     <VcsType>Git</VcsType>
