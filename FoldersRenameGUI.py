@@ -20,6 +20,7 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 	def __init__(self, parent=None):
 		super(FoldersRenameGUI, self).__init__(parent)
 		self.parent = parent
+		self.path_prog = path.dirname(path.abspath(__file__))
 		self.setupUi(self)
 
 		# default config
@@ -49,7 +50,8 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 		
 		self.setMinimumSize(600, 600)
 		self.resize(self.configuration['General']['Width'], self.configuration['General']['Height'])
-		self.setWindowIcon(QIcon(self.configuration['General']['Ico']))
+		icofile = path.join(self.path_prog, self.configuration['General']['Ico'])
+		self.setWindowIcon(QIcon(icofile))
 		self.setWindowTitle(self.configuration['General']['Programs'] + ' ' + str(self.configuration['General']['Version']))
 		self.arrayactions = []
 		self.file_json = None
