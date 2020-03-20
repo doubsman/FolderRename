@@ -11,11 +11,11 @@
     "Actions": {
         "-": [
             "Actions",
-            "Paramater",
-            "Paramater",
-            "Paramater",
-            "Paramater",
-            "Paramater"
+            "Parameter",
+            "Parameter",
+            "Parameter",
+            "Parameter",
+            "Parameter"
         ],
         "move": [
             "Move",

@@ -24,7 +24,7 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 		self.setupUi(self)
 
 		# default config
-		self.listcolumnsactions = {'-'       : ['Actions', 'Paramater', 'Paramater', 'Paramater', 'Paramater', 'Paramater'],
+		self.listcolumnsactions = {'-'       : ['Actions'] + ['Parameter']*5,
 								   'move'    : ['Actions', 'Start', 'Length', 'Goal', 'Deco Left', 'Deco Right'],
 								   'replace' : ['Actions', 'Replace', 'By', '---', '---', '---'],
 								   'add'     : ['Actions', 'Text','Start', '---', '---', '---'],
