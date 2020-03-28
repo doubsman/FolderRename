@@ -80,7 +80,7 @@ class FoldersRename(QObject):
 		self.cleanlist = []
 		for folderName in self.pathList:
 			posiC = self.convert_position_character(goalC, folderName)
-			moveC = folderName[startC:lenghtC]
+			moveC = folderName[startC:lenghtC + startC]
 			tempC = folderName[:startC] + folderName[startC + lenghtC:]
 			self.cleanlist.append(tempC[:posiC] + decoCL + moveC.strip() + decoCR + tempC[posiC:])
 		self.pathList = self.cleanlist

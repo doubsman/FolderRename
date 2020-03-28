@@ -211,12 +211,7 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 				par2 = self.trtparams(action[2], 'mix')
 				par3 = self.trtparams(action[3], 'str')
 				par4 = self.trtparams(action[4], 'str')
-				if par3 == '':
-					self.FoldersRename.add_characters(par1, par2)
-				elif par4 == '':
-					self.FoldersRename.add_characters(par1, par2, par3)
-				else:
-					self.FoldersRename.add_characters(par1, par2, par3, par4)
+				self.FoldersRename.add_characters(par1, par2, par3, par4)
 			elif action[0] == 'delete':
 				par1 = self.trtparams(action[1], 'int')
 				par2 = self.trtparams(action[2], 'mix')
@@ -224,7 +219,11 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 	
 	def trtparams(self, param, type = None):
 		"""Convert String to int function type param."""
-		if type == 'int':
+		if param is None and (type == 'int' or type == 'mix'):
+			param = 0
+		elif param is None and type == 'str':
+			param = ''
+		elif type == 'int':
 			param = int(param)
 		elif type == 'str':
 			param = str(param)

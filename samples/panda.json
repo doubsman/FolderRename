@@ -1,0 +1,42 @@
+[
+    [
+        "delete",
+        "0",
+        "2",
+        null,
+        null,
+        null
+    ],
+    [
+        "add",
+        "Panda Dub",
+        "0",
+        null,
+        null,
+        null
+    ],
+    [
+        "replace",
+        "- 2",
+        "(2",
+        null,
+        null,
+        null
+    ],
+    [
+        "add",
+        ")",
+        "max",
+        null,
+        null,
+        null
+    ],
+    [
+        "replace",
+        "None",
+        "",
+        null,
+        null,
+        null
+    ]
+]

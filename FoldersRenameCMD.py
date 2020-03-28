@@ -13,13 +13,13 @@ if __name__ == '__main__':
 		myfolder = argv[1]
 	else:
 		# test envt
-		myfolder = r'T:\work\Omiki (FLAC)'
+		myfolder = r'D:\WorkDev\MP3TrtFiles'
 	# build class process
 	BuildProcess = FoldersRename()
 	BuildProcess.folder_init(myfolder)
+	BuildProcess.add_characters('Omiki ', 0)
 	BuildProcess.move_characters(0, 5, 'max',' (',')')
 	BuildProcess.replace_characters(' [320]', '')
-	BuildProcess.add_characters('Omiki ', 0)
 	#BuildProcess.delete_characters(5,3)
 	BuildProcess.folders_control()
 	# processing
