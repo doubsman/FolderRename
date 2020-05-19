@@ -1,7 +1,7 @@
 {
     "General": {
         "Programs": "Folders Rename Managment",
-        "Version": 0.92,
+        "Version": 0.93,
         "Size Row Table": 30,
         "Font": "Calibri",
         "Ico": "FoldersRenameGUI.ico",
@@ -45,6 +45,14 @@
             "Delete",
             "Start",
             "Length",
+            "---",
+            "---",
+            "---"
+        ],
+        "title": [
+            "---",
+            "---",
+            "---",
             "---",
             "---",
             "---"

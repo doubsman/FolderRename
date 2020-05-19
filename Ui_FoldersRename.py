@@ -8,7 +8,8 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-
+# add for Dnd
+from FolderRenameDnd import QLineEditDnd
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -21,9 +22,22 @@ class Ui_MainWindow(object):
         self.verticalLayout_3.setObjectName("verticalLayout_3")
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
-        self.lin_pathfolder = QtWidgets.QLineEdit(self.centralwidget)
+        # add for Dnd
+        #self.lin_pathfolder = QtWidgets.QLineEdit(self.centralwidget)
+        self.lin_pathfolder = QLineEditDnd(self)
         self.lin_pathfolder.setObjectName("lin_pathfolder")
         self.horizontalLayout.addWidget(self.lin_pathfolder)
+        self.label = QtWidgets.QLabel(self.centralwidget)
+        self.label.setObjectName("label")
+        self.horizontalLayout.addWidget(self.label)
+        self.lin_filter = QtWidgets.QLineEdit(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.lin_filter.sizePolicy().hasHeightForWidth())
+        self.lin_filter.setSizePolicy(sizePolicy)
+        self.lin_filter.setObjectName("lin_filter")
+        self.horizontalLayout.addWidget(self.lin_filter)
         self.btn_selectfolder = QtWidgets.QPushButton(self.centralwidget)
         self.btn_selectfolder.setText("")
         self.btn_selectfolder.setObjectName("btn_selectfolder")
@@ -67,6 +81,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        self.label.setText(_translate("MainWindow", "Filter"))
 
 
 if __name__ == "__main__":

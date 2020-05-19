@@ -7,32 +7,8 @@ from Ui_FoldersRename import Ui_MainWindow
 #from Ui_MainWindow import Ui_Dialog
 from FoldersRename import FoldersRename
 from PyQt5.QtCore import Qt, pyqtSlot, pyqtSignal
-from PyQt5.QtGui import QIcon, QStandardItemModel, QStandardItem, QMouseEvent, QFont
+from PyQt5.QtGui import QIcon, QStandardItemModel, QStandardItem, QMouseEvent, QFont, QColor
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QStyle, QMenu, QComboBox, QLineEdit, QMessageBox
-
-
-
-class QLineEditDnd(QLineEdit):
-	# signal
-	signalchgtfolder = pyqtSignal(str)		# add path
-
-	def __init__ (self, parent):
-		"""Init QLineEdit Dnd."""
-		super(QLineEdit, self).__init__(parent)
-		self.setAcceptDrops(True)
-
-	def dragEnterEvent (self, event):
-		"""Accept url"""
-		if event.mimeData().hasUrls():
-			event.acceptProposedAction()
-
-	def dropEvent (self, event):
-		event.setAccepted(True)
-		if event.mimeData().hasUrls():
-			url = event.mimeData().urls()[0]
-			urlpath = url.toLocalFile()
-			self.setText(urlpath)
-			self.signalchgtfolder.emit(urlpath)
 
 
 class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
@@ -51,7 +27,8 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 								   'move'    : ['Actions', 'Start', 'Length', 'Goal', 'Deco Left', 'Deco Right'],
 								   'replace' : ['Actions', 'Replace', 'By', '---', '---', '---'],
 								   'add'     : ['Actions', 'Text','Start', 'Deco Left', 'Deco Right', '---'],
-								   'delete'  : ['Actions', 'Start','Length', '---', '---', '---']}
+								   'delete'  : ['Actions', 'Start','Length', '---', '---', '---'],
+								   'title'  : ['Actions', '---','---', '---', '---', '---']}
 		self.defaultconfiguration = {  'General' : { 'Programs'  : 'Folders Rename Managment',
 											  'Version'  : 0.7,
 											  'Size Row Table'  : 30,
@@ -101,11 +78,12 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 		self.btn_test.setEnabled(False)
 
 		# replace QlineEdit for Drag And Drop
-		self.horizontalLayout.removeWidget(self.lin_pathfolder)
-		self.lin_pathfolder.hide()
-		self.lin_pathfolderDnd = QLineEditDnd(self)
-		self.horizontalLayout.addWidget(self.lin_pathfolderDnd)
-		self.lin_pathfolderDnd.signalchgtfolder.connect(self.selectFolder)
+		#self.horizontalLayout.removeWidget(self.lin_pathfolder)
+		#self.lin_pathfolder.hide()
+		#self.lin_pathfolderDnd = QLineEditDnd(self)
+		#self.lin_pathfolder = QLineEditDnd(self)
+		#self.horizontalLayout.addWidget(self.lin_pathfolderDnd)
+		self.lin_pathfolder.signalchgtfolder.connect(self.selectFolder)
 
 		# define lists
 		self.listcolumnsresult = ['Current Name','New Name']
@@ -130,7 +108,8 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 		
 		# events
 		self.btn_selectfolder.clicked.connect(self.selectFolder)
-		self.lin_pathfolderDnd.returnPressed.connect(lambda: self.selectFolder(True))
+		self.lin_pathfolder.returnPressed.connect(lambda: self.selectFolder(True))
+		self.lin_filter.returnPressed.connect(lambda: self.selectFolder(True))
 		self.btn_save.clicked.connect(self.saveListactions)
 		self.btn_load.clicked.connect(self.loadListactions)
 		self.btn_test.clicked.connect(self.testFoldersRename)
@@ -141,7 +120,7 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 
 		# init class FoldersRename
 		self.pathfolder = None
-		self.FoldersRename = FoldersRename()
+		self.FoldersRename = FoldersRename(self)
 		# init actions tab
 		self.fillTableactions()
 	
@@ -160,10 +139,10 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 		if not linpathfolder:
 			self.pathfolder = QFileDialog.getExistingDirectory(self, "Select Directory")
 		else:
-			self.pathfolder = self.lin_pathfolderDnd.text()
+			self.pathfolder = self.lin_pathfolder.text()
 		if path.isdir(self.pathfolder):
-			self.lin_pathfolderDnd.setText(self.pathfolder.replace('/','\\'))
-			self.FoldersRename.folder_init(self.pathfolder)
+			self.lin_pathfolder.setText(self.pathfolder.replace('/','\\'))
+			self.FoldersRename.folder_init(self.pathfolder, self.lin_filter.text())
 			self.fillTablefolder()
 
 	def runFoldersRename(self):
@@ -180,7 +159,7 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 		# build list actions
 		self.buildListactions()
 		# Reinit list result
-		self.FoldersRename.pathList = self.FoldersRename.backList
+		self.FoldersRename.cancel_actions()
 		# realise actions
 		self.realiseListactions()
 		# display results
@@ -253,6 +232,9 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 				par2 = self.trtparams(action[2], 'mix')
 				if self.boolaction:
 					self.FoldersRename.delete_characters(par1, par2)
+			elif action[0] == 'title':
+				if self.boolaction:
+					self.FoldersRename.format_tittle()
 	
 	def trtparams(self, param, type = None):
 		"""Convert String to int function type param."""
@@ -329,7 +311,9 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 		for row in range(self.modelfolder.rowCount()):
 			item = QStandardItem(self.FoldersRename.backList[counter])
 			self.modelfolder.setItem(row, 0, item)
-			item = QStandardItem(self.FoldersRename.cleanlist[counter])
+			item = QStandardItem(self.FoldersRename.pathList[counter])
+			if self.FoldersRename.backList[counter] != self.FoldersRename.pathList[counter]:
+				item.setData(QColor(146, 42, 232), Qt.ForegroundRole)
 			self.modelfolder.setItem(row, 1, item)
 			counter += 1
 		self.tbl_viewresult.horizontalHeader().setStretchLastSection(False)
@@ -391,7 +375,7 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 		for idx in indexes:
 			items.append(model.itemFromIndex(idx))
 			rowNum = idx.row()
-			newRow = rowNum+direction
+			newRow = rowNum + direction
 			if not (0 <= newRow < model.rowCount()):
 				continue
 			rowItems = model.takeRow(rowNum)
