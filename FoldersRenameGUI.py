@@ -10,6 +10,13 @@ from PyQt5.QtCore import Qt, pyqtSlot, pyqtSignal
 from PyQt5.QtGui import QIcon, QStandardItemModel, QStandardItem, QMouseEvent, QFont, QColor
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QStyle, QMenu, QComboBox, QLineEdit, QMessageBox
 
+""" add file Ui_FoldersRename.py after regeneration
+		line 11: from FolderRenameDnd import QLineEditDnd
+        line 25: 	# add for Dnd
+        			#self.lin_pathfolder = QtWidgets.QLineEdit(self.centralwidget)
+        			self.lin_pathfolder = QLineEditDnd(self)
+"""
+
 
 class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 	"""Init mini Gui constants."""
@@ -74,17 +81,11 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 		self.btn_load.setText('Load Json')
 		self.btn_test.setIcon(self.style().standardIcon(QStyle.SP_BrowserReload))
 		self.btn_test.setText('Test Actions')
+		self.btn_cancel.setText('Cancel Actions')
+		self.btn_cancel.setEnabled(False)
 		self.btn_run.setEnabled(False)
 		self.btn_test.setEnabled(False)
-
-		# replace QlineEdit for Drag And Drop
-		#self.horizontalLayout.removeWidget(self.lin_pathfolder)
-		#self.lin_pathfolder.hide()
-		#self.lin_pathfolderDnd = QLineEditDnd(self)
-		#self.lin_pathfolder = QLineEditDnd(self)
-		#self.horizontalLayout.addWidget(self.lin_pathfolderDnd)
-		self.lin_pathfolder.signalchgtfolder.connect(self.selectFolder)
-
+		
 		# define lists
 		self.listcolumnsresult = ['Current Name','New Name']
 		self.listsizeresult = [200, 200]
@@ -108,12 +109,14 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 		
 		# events
 		self.btn_selectfolder.clicked.connect(self.selectFolder)
+		self.lin_pathfolder.signalchgtfolder.connect(self.selectFolder)
 		self.lin_pathfolder.returnPressed.connect(lambda: self.selectFolder(True))
 		self.lin_filter.returnPressed.connect(lambda: self.selectFolder(True))
 		self.btn_save.clicked.connect(self.saveListactions)
 		self.btn_load.clicked.connect(self.loadListactions)
 		self.btn_test.clicked.connect(self.testFoldersRename)
 		self.btn_run.clicked.connect(self.runFoldersRename)
+		self.btn_cancel.clicked.connect(self.cancelRename)
 		self.tbl_viewactions.setContextMenuPolicy(Qt.CustomContextMenu)
 		self.tbl_viewactions.customContextMenuRequested.connect(self.popUpTreeAlbums)
 		self.tbl_viewactions.clicked.connect(self.onSelectAction)
@@ -154,6 +157,12 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 			self.FoldersRename.folders_rename()
 			# display results
 			self.fillTablefolder()
+			# display cancel Actions
+			self.btn_cancel.setEnabled(True)
+	
+	def cancelRename(self):
+		"""Cancel all actions and Rename folders."""
+		self.FoldersRename.folders_cancelrename()
 	
 	def testFoldersRename(self):
 		# build list actions
@@ -208,7 +217,7 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 		for action in self.arrayactions:
 			self.boolaction = True
 			if action[0] == 'move':
-				par1 = self.trtparams(action[1], 'int')
+				par1 = self.trtparams(action[1], 'mix')
 				par2 = self.trtparams(action[2], 'mix')
 				par3 = self.trtparams(action[3], 'mix')
 				par4 = self.trtparams(action[4], 'str')
@@ -228,7 +237,7 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 				if self.boolaction:
 					self.FoldersRename.add_characters(par1, par2, par3, par4)
 			elif action[0] == 'delete':
-				par1 = self.trtparams(action[1], 'int')
+				par1 = self.trtparams(action[1], 'mix')
 				par2 = self.trtparams(action[2], 'mix')
 				if self.boolaction:
 					self.FoldersRename.delete_characters(par1, par2)

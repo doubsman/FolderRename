@@ -48,6 +48,22 @@ class FoldersRename(QObject):
 		self.logProcess.write_log_file('END OPERATIONS.',"", False)
 		self.logProcess.view_log_file()
 
+	def folders_cancelrename(self):
+		"""Rename folders list and write log."""
+		self.logProcess.write_log_file('START CANCEL OPERATIONS', self.pathfolder, False)
+		counter = 0
+		for folderName in self.backList:
+			# clean name
+			self.logProcess.write_log_file('FOLDER FOLDER', folderName)
+			if folderName != self.pathList[counter]:
+				self.logProcess.write_log_file('CANCEL NAME FOLDER', self.pathList[counter])
+				rename(path.join(self.pathfolder, self.pathList[counter]), path.join(self.pathfolder, folderName))
+			else:
+				self.logProcess.write_log_file('NO MODIFICATION', self.pathList[counter])
+			counter += 1
+		self.logProcess.write_log_file('END OPERATIONS.',"", False)
+		self.logProcess.view_log_file()
+
 	def folders_control(self):
 		"""Display results."""
 		for counter in range(0, len(self.pathList)):
@@ -76,14 +92,16 @@ class FoldersRename(QObject):
 	def delete_characters(self, startC, lenghtC):
 		for counter in range(0, len(self.pathList)):
 			folderName = self.pathList[counter]
-			self.pathList[counter] = folderName[:startC] + folderName[lenghtC + startC:]
+			posiC = self.convert_position_character(startC, folderName)
+			self.pathList[counter] = folderName[:posiC] + folderName[lenghtC + posiC:]
 
 	def move_characters(self, startC, lenghtC, goalC, decoCL ="", decoCR =""):
 		for counter in range(0, len(self.pathList)):
 			folderName = self.pathList[counter]
+			starC = self.convert_position_character(startC, folderName)
 			posiC = self.convert_position_character(goalC, folderName)
-			moveC = folderName[startC:lenghtC + startC]
-			tempC = folderName[:startC] + folderName[startC + lenghtC:]
+			moveC = folderName[starC:lenghtC + starC]
+			tempC = folderName[:starC] + folderName[starC + lenghtC:]
 			self.pathList[counter] = tempC[:posiC] + decoCL + moveC.strip() + decoCR + tempC[posiC:]
 	
 	def format_tittle(self):
@@ -91,12 +109,29 @@ class FoldersRename(QObject):
 			self.pathList[counter] = self.pathList[counter].title()
 
 	def convert_position_character(self, posi, item):
-		"""conversion max to len()."""
+		"""conversion 
+				max 	: end of the string
+				pos(n:s): find position string , 
+		"""
 		if isinstance(posi, str):
 			# str
-			if posi == 'max':
+			if posi.startswith('max'):
 				posiC = int(len(item))
+			elif posi.startswith('pos'):
+				params = posi.replace('pos(','').replace(')','')
+				number = int(params.split(":")[0])
+				string = params.split(":")[1]
+				posiC = self.find_nth(item, string, number)
+				print(posi, number, string, posiC)
 		else:
 			# int
 			posiC = posi
 		return posiC
+
+	def find_nth(self, haystack, needle, n):
+		"""https://stackoverflow.com/questions/1883980/find-the-nth-occurrence-of-substring-in-a-string."""
+		start = haystack.find(needle)
+		while start >= 0 and n > 1:
+			start = haystack.find(needle, start+len(needle))
+			n -= 1
+		return start

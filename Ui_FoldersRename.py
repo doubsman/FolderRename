@@ -8,8 +8,8 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-# add for Dnd
 from FolderRenameDnd import QLineEditDnd
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -22,11 +22,16 @@ class Ui_MainWindow(object):
         self.verticalLayout_3.setObjectName("verticalLayout_3")
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
-        # add for Dnd
-        #self.lin_pathfolder = QtWidgets.QLineEdit(self.centralwidget)
+        self.lab_pathfolder = QtWidgets.QLabel(self.centralwidget)
+        self.lab_pathfolder.setObjectName("lab_pathfolder")
+        self.horizontalLayout.addWidget(self.lab_pathfolder)
         self.lin_pathfolder = QLineEditDnd(self)
         self.lin_pathfolder.setObjectName("lin_pathfolder")
         self.horizontalLayout.addWidget(self.lin_pathfolder)
+        self.btn_selectfolder = QtWidgets.QPushButton(self.centralwidget)
+        self.btn_selectfolder.setText("")
+        self.btn_selectfolder.setObjectName("btn_selectfolder")
+        self.horizontalLayout.addWidget(self.btn_selectfolder)
         self.label = QtWidgets.QLabel(self.centralwidget)
         self.label.setObjectName("label")
         self.horizontalLayout.addWidget(self.label)
@@ -38,10 +43,6 @@ class Ui_MainWindow(object):
         self.lin_filter.setSizePolicy(sizePolicy)
         self.lin_filter.setObjectName("lin_filter")
         self.horizontalLayout.addWidget(self.lin_filter)
-        self.btn_selectfolder = QtWidgets.QPushButton(self.centralwidget)
-        self.btn_selectfolder.setText("")
-        self.btn_selectfolder.setObjectName("btn_selectfolder")
-        self.horizontalLayout.addWidget(self.btn_selectfolder)
         self.verticalLayout_3.addLayout(self.horizontalLayout)
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
@@ -64,6 +65,10 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3.addWidget(self.btn_save)
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_3.addItem(spacerItem)
+        self.btn_cancel = QtWidgets.QPushButton(self.centralwidget)
+        self.btn_cancel.setText("")
+        self.btn_cancel.setObjectName("btn_cancel")
+        self.horizontalLayout_3.addWidget(self.btn_cancel)
         self.btn_test = QtWidgets.QPushButton(self.centralwidget)
         self.btn_test.setText("")
         self.btn_test.setObjectName("btn_test")
@@ -81,6 +86,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        self.lab_pathfolder.setText(_translate("MainWindow", "Path"))
         self.label.setText(_translate("MainWindow", "Filter"))
 
 
