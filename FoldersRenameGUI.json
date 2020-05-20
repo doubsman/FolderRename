@@ -18,7 +18,7 @@
             "Parameter"
         ],
         "move": [
-            "Move",
+            "Actions",
             "Start",
             "Length",
             "Goal",
@@ -26,7 +26,7 @@
             "Deco Right"
         ],
         "replace": [
-            "Replace",
+            "Actions",
             "Replace",
             "By",
             "---",
@@ -34,7 +34,7 @@
             "---"
         ],
         "add": [
-            "Add",
+            "Actions",
             "Text",
             "Start",
             "Deco Left",
@@ -42,7 +42,7 @@
             "---"
         ],
         "delete": [
-            "Delete",
+            "Actions",
             "Start",
             "Length",
             "---",
@@ -50,7 +50,7 @@
             "---"
         ],
         "title": [
-            "---",
+            "Actions",
             "---",
             "---",
             "---",

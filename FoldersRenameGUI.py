@@ -75,16 +75,17 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 		self.btn_selectfolder.setIcon(self.style().standardIcon(QStyle.SP_DialogOpenButton))
 		self.btn_run.setIcon(self.style().standardIcon(QStyle.SP_DialogApplyButton))
 		self.btn_run.setText('Rename Folders')
+		self.btn_run.setEnabled(False)
 		self.btn_save.setIcon(self.style().standardIcon(QStyle.SP_DialogSaveButton))
-		self.btn_save.setText('Save Json')
+		self.btn_save.setText('Save Actions')
 		self.btn_load.setIcon(self.style().standardIcon(QStyle.SP_DialogSaveButton))
-		self.btn_load.setText('Load Json')
+		self.btn_load.setText('Load Actions')
 		self.btn_test.setIcon(self.style().standardIcon(QStyle.SP_BrowserReload))
 		self.btn_test.setText('Test Actions')
+		self.btn_test.setEnabled(False)
+		self.btn_cancel.setIcon(self.style().standardIcon(QStyle.SP_DialogCancelButton))
 		self.btn_cancel.setText('Cancel Actions')
 		self.btn_cancel.setEnabled(False)
-		self.btn_run.setEnabled(False)
-		self.btn_test.setEnabled(False)
 		
 		# define lists
 		self.listcolumnsresult = ['Current Name','New Name']
@@ -118,7 +119,7 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 		self.btn_run.clicked.connect(self.runFoldersRename)
 		self.btn_cancel.clicked.connect(self.cancelRename)
 		self.tbl_viewactions.setContextMenuPolicy(Qt.CustomContextMenu)
-		self.tbl_viewactions.customContextMenuRequested.connect(self.popUpTreeAlbums)
+		self.tbl_viewactions.customContextMenuRequested.connect(self.popUpTreeActions)
 		self.tbl_viewactions.clicked.connect(self.onSelectAction)
 
 		# init class FoldersRename
@@ -309,9 +310,6 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 				self.buildComboActions(row, self.arrayactions[row][0])
 			else:
 				self.buildComboActions(row)
-		#self.tbl_viewactions.horizontalHeader().setStretchLastSection(False)
-		#self.tbl_viewactions.resizeColumnsToContents()
-		#self.tbl_viewactions.horizontalHeader().setStretchLastSection(True)			
 
 	def fillTablefolder(self):
 		"""Display columns list and transformation."""
@@ -331,7 +329,7 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 		self.btn_run.setEnabled(len(self.FoldersRename.backList) > 0)
 		self.btn_test.setEnabled(len(self.FoldersRename.backList) > 0)
 	
-	def popUpTreeAlbums(self, position):
+	def popUpTreeActions(self, position):
 		self.menua.exec_(self.tbl_viewactions.viewport().mapToGlobal(position))
 	
 	def onComboChanged(self, row):
@@ -350,6 +348,14 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 		combo = self.tbl_viewactions.indexWidget(i)
 		value = combo.currentText()
 		self.modelactions.setHorizontalHeaderLabels(self.listcolumnsactions[value])
+		column = 1
+		for itemlist in self.listcolumnsactions[value]:
+			if itemlist == '---':
+				# no params
+				item = QStandardItem('-')
+				#item.setData(QColor(166, 153, 152), Qt.BackgroundRole)
+				self.modelactions.setItem(row, column - 1, item)
+			column += 1
 
 	def remove_action(self):
 		model = self.modelactions

@@ -111,7 +111,7 @@ class FoldersRename(QObject):
 	def convert_position_character(self, posi, item):
 		"""conversion 
 				max 	: end of the string
-				pos(n:s): find position string , 
+				pos(n:s): find position occurence:string
 		"""
 		if isinstance(posi, str):
 			# str
