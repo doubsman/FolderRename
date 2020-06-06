@@ -84,7 +84,7 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 		self.btn_test.setText('Test Actions')
 		self.btn_test.setEnabled(False)
 		self.btn_cancel.setIcon(self.style().standardIcon(QStyle.SP_DialogCancelButton))
-		self.btn_cancel.setText('Cancel Actions')
+		self.btn_cancel.setText('Cancel Rename')
 		self.btn_cancel.setEnabled(False)
 		
 		# define lists
@@ -348,14 +348,15 @@ class FoldersRenameGUI(QMainWindow, Ui_MainWindow):
 		combo = self.tbl_viewactions.indexWidget(i)
 		value = combo.currentText()
 		self.modelactions.setHorizontalHeaderLabels(self.listcolumnsactions[value])
-		column = 1
-		for itemlist in self.listcolumnsactions[value]:
-			if itemlist == '---':
-				# no params
-				item = QStandardItem('-')
-				#item.setData(QColor(166, 153, 152), Qt.BackgroundRole)
-				self.modelactions.setItem(row, column - 1, item)
-			column += 1
+		if value != '-':
+			column = 1
+			for itemlist in self.listcolumnsactions[value]:
+				if itemlist == '---':
+					# no params
+					item = QStandardItem('-')
+					#item.setData(QColor(166, 153, 152), Qt.BackgroundRole)
+					self.modelactions.setItem(row, column - 1, item)
+				column += 1
 
 	def remove_action(self):
 		model = self.modelactions
